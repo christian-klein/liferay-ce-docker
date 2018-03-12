@@ -28,13 +28,22 @@ ENV DB_PORT=${DB_PORT}
 ########### INSTALL LIFERAY BUNDLE ################
 RUN groupadd liferay;useradd -M -s /bin/nologin -g liferay -d /opt/liferay liferay
 
-ADD --chown=liferay:liferay ${FILE_LOC}${START_SCRIPT} /opt
-ADD --chown=liferay:liferay ${FILE_LOC}${BUNDLE} /var/lib/${BUNDLE}
+#ADD --chown=liferay:liferay ${FILE_LOC}${START_SCRIPT} /opt
+#ADD --chown=liferay:liferay ${FILE_LOC}${BUNDLE} /var/lib/${BUNDLE}
+#ADD --chown=liferay:liferay ${FILE_LOC}portal-setup-wizard.properties /opt/liferay
+#ADD --chown=liferay:liferay ${FILE_LOC}portal-ext.properties /opt/liferay
+
+# Docker Hub does not support --chown yet
+ADD ${FILE_LOC}${START_SCRIPT} /opt
+ADD ${FILE_LOC}${BUNDLE} /var/lib/${BUNDLE}
+
 RUN ln -s /var/lib/${BUNDLE} /opt/liferay && \
     ln -s /var/lib/${BUNDLE}/$(ls /var/lib/${BUNDLE}|grep tomcat)  /opt/tomcat
 
-ADD --chown=liferay:liferay ${FILE_LOC}portal-setup-wizard.properties /opt/liferay
-ADD --chown=liferay:liferay ${FILE_LOC}portal-ext.properties /opt/liferay
+ADD ${FILE_LOC}portal-setup-wizard.properties /opt/liferay
+ADD ${FILE_LOC}portal-ext.properties /opt/liferay
+
+RUN chown -R liferay:liferay /opt/* /var/lib/${BUNDLE}
 
 RUN chown -h liferay:liferay /opt/liferay /opt/tomcat && \
     chmod u+x /opt/${START_SCRIPT} && \
